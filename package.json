@@ -1,0 +1,41 @@
+{
+  "name": "@ciplnew/bugtracking",
+  "version": "1.0.0",
+  "description": "Report Node.js exceptions to BugTrack",
+  "keywords": [
+    "bug",
+    "bugtrack",
+    "bugtracking",
+    "node",
+    "express",
+    "error-tracking"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "ajithkumar.a",
+    "email": "ajithkumar.a@colanonline.com"
+  },
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./src/index.js",
+      "import": "./src/index.js",
+      "types": "./src/index.d.ts"
+    }
+  },
+  "files": [
+    "src"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
+  "peerDependencies": {
+    "express": ">=4"
+  },
+  "peerDependenciesMeta": {
+    "express": {
+      "optional": true
+    }
+  }
+}
