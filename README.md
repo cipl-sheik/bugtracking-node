@@ -1,6 +1,8 @@
 # BugTrack Node package
 
-Report Node.js / Express exceptions to BugTrack — same ingest model as the Laravel package (`ciplnew/bugtracking`).
+Report Node.js / Express exceptions to BugTrack (AppRadar) — same ingest model as the Laravel package (`ciplnew/bugtracking`).
+
+Dashboard: https://appradar.colanapps.in/login
 
 ## Install
 
@@ -8,21 +10,32 @@ Report Node.js / Express exceptions to BugTrack — same ingest model as the Lar
 npm install @ciplnew/bugtracking
 ```
 
+Or from GitHub:
+
+```bash
+npm install github:cipl-sheik/bugtracking-node
+```
+
 ## Setup
 
-1. Get a project key from https://bugtracking.colanapps.in
-2. Add env vars (or pass options to `init`):
+1. Log in at https://appradar.colanapps.in/login
+2. Create a project — copy the **project token** shown there
+3. Add env vars in your Node app:
 
 ```env
 BUGTRACK_ENABLED=true
-BUGTRACK_URL=https://bugtracking.colanapps.in/api/ingest/
-BUGTRACK_KEY=your-project-key
-# legacy alias still accepted:
-# BUG_TRCAK_KEY=your-project-key
+BUGTRACK_URL=https://appradar.colanapps.in/api/v1/ingest
+BUGTRACK_KEY=your-project-token
 BUGTRACK_ENVIRONMENT=production
 ```
 
-3. Wire the SDK in your app:
+| Env | What it is |
+|-----|------------|
+| `BUGTRACK_URL` | Ingest API endpoint |
+| `BUGTRACK_KEY` | Token created with the project (sent as `X-Bugtrack-Key`) |
+| `BUG_TRCAK_KEY` | Legacy alias — still accepted if `BUGTRACK_KEY` is missing |
+
+4. Wire the SDK:
 
 ```js
 const express = require('express');
@@ -31,24 +44,18 @@ const bugtrack = require('@ciplnew/bugtracking');
 bugtrack.init({
   enabled: true,
   url: process.env.BUGTRACK_URL,
-  key: process.env.BUGTRACK_KEY || process.env.BUG_TRCAK_KEY,
+  key: process.env.BUGTRACK_KEY,
   environment: process.env.NODE_ENV || 'production',
 });
 
-// optional: uncaughtException / unhandledRejection
 bugtrack.captureProcessErrors();
 
 const app = express();
-
 app.use(bugtrack.requestHandler());
 
-app.get('/debug-bugtrack', () => {
-  throw new Error('My first BugTrack error!');
-});
+// ... your routes ...
 
-// Must be after routes — reports then forwards to your own error handler
-app.use(bugtrack.errorHandler());
-
+app.use(bugtrack.errorHandler()); // after routes, before your own error handler
 app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ message: err.message });
 });
@@ -73,8 +80,8 @@ try {
 | `url` | `BUGTRACK_URL` | — |
 | `key` | `BUGTRACK_KEY` / `BUG_TRCAK_KEY` | — |
 | `environment` | `BUGTRACK_ENVIRONMENT` | `NODE_ENV` / `production` |
-| `ignore` | — | `[]` (class or error name) |
+| `ignore` | — | `[]` |
 | `connectTimeoutMs` | `BUGTRACK_CONNECT_TIMEOUT_MS` | `2000` |
 | `timeoutMs` | `BUGTRACK_TIMEOUT_MS` | `3000` |
 
-Client errors (`status` / `statusCode` below 500) are skipped automatically, matching the Laravel reporter.
+Client errors (`status` / `statusCode` below 500) are skipped automatically.
